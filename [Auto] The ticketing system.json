@@ -1,0 +1,297 @@
+{
+  "name": "[Auto] The ticketing system",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "IT Support Ticketing Form",
+        "formDescription": "Please complete this form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nama",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Divisi",
+              "placeholder": "example : PT, BD, AO",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Kendala",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Laptop"
+                  },
+                  {
+                    "option": "Aplikasi"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Note",
+              "placeholder": "Please input detail issues"
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thank you for submit, we will contact you immediately!"
+            }
+          },
+          "useWorkflowTimezone": true
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0c11b72c-ff7f-4a91-8088-accd613200fa",
+      "name": "On form submission",
+      "webhookId": "5fc97db8-4c4d-4c25-aac3-ea6ec4b7e9c7"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "[Your Gsheet id]",
+          "mode": "list",
+          "cachedResultName": "[your Gsheet name]",
+          "cachedResultUrl": "[Your Gsheet url]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 611849845,
+          "mode": "list",
+          "cachedResultName": "[Your Gsheet tabs name]",
+          "cachedResultUrl": "[Your Gsheet url]"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nama": "={{ $json.Nama }}",
+            "Divisi": "={{ $json.Divisi }}",
+            "Note": "={{ $json.Note }}",
+            "Kendala": "={{ $json.Kendala }}",
+            "timestamp": "={{ $json.submittedAt }}",
+            "Status": "Open"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TicketID",
+              "displayName": "TicketID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nama",
+              "displayName": "Nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Divisi",
+              "displayName": "Divisi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kendala",
+              "displayName": "Kendala",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "217159f0-561d-4d25-a9df-6d83fda69783",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "[your credential id]",
+          "name": "[your credential name]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "[your Gchat Space's webhook]",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"cardsV2\": [\n    {\n      \"cardId\": \"Notify\",\n      \"card\": {\n        \"header\": {\n          \"title\": \"🚨Need Support🚨\",\n          \"subtitle\": \"{{ $json.TicketID }} Notify from Ticketing system\",\n          \"imageType\": \"CIRCLE\"\n        },\n        \"sections\": [\n          {\n            \"widgets\": [\n              {\n                \"textParagraph\": {\n                  \"text\": \"<b>Check this ASAP!</b>\\\\n \\\\n <b>Nama Karyawan: </b>{{ $json.Nama }}\\\\n <b>Divisi: </b>{{ $json.Divisi }}\\\\n <b>Kendala: </b>{{ $json.Kendala }}\\\\n <b>Note: </b>{{ $json.Note }}\"\n                }\n              }\n            ]\n          }\n        ]\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "a90c157d-8786-4b22-8422-311ae14b9eaf",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "[Your Gsheet id]",
+          "mode": "list",
+          "cachedResultName": "[Your Gsheet name]",
+          "cachedResultUrl": "[Your Gsheet url]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 611849845,
+          "mode": "list",
+          "cachedResultName": "[Your Gsheet tabs]",
+          "cachedResultUrl": "[your gsheet url]"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Open"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8c7217d3-f32e-4034-ad69-f1af98a06b55",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "[your google credential id]",
+          "name": "[Your google credential name ]"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "VmxY46r9bn3DH7Hb"
+  },
+  "versionId": "a8985375-8eec-4100-9dc3-ae526cef19b2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "86f9a48b16b8fc894652167d5e07d0d3dcaf52b83459edcb6298b723e05f2444"
+  },
+  "id": "0VGNkQf7oKUwUxed",
+  "tags": [
+    {
+      "createdAt": "2025-11-14T07:40:29.981Z",
+      "updatedAt": "2025-11-14T07:40:29.981Z",
+      "id": "RJXMgW8wbpYFFDoF",
+      "name": "IT"
+    }
+  ]
+}

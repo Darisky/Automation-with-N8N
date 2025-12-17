@@ -1,0 +1,432 @@
+{
+  "name": "[Auto] Gsheet to Wordpress",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Purpose\nSending automatic generate Content (text) with AI, and sending into wordpress's draft\n\n## Note:\nThis is Ghseet to wordpress, \n- Gsheet updated row, N8N read new row updated row,\n- Filter node: filtering just for 'Ready to Generate' Status,\n- GPT for only text prompt, \n- sending to wordpress,\n- Last mark 'Ready to Generate' to 'Done' for avoiding re generate prompt\n\n## Credit\n- Gsheet\n- AI : OpenAI API chat GPT\n- flow : DrskyN",
+        "height": 416,
+        "width": 768,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        384
+      ],
+      "typeVersion": 1,
+      "id": "d46f21d3-2132-421a-acee-7706b5ace012",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "[your Gsheet ID]",
+          "mode": "list",
+          "cachedResultName": "[your Gsheet Name]",
+          "cachedResultUrl": "[your Gsheet URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1954594741,
+          "mode": "list",
+          "cachedResultName": "[your Gsheet Tab]",
+          "cachedResultUrl": "[your Gsheet URL]"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        304,
+        224
+      ],
+      "id": "fedcadae-e88c-41c6-8ffa-09218c389281",
+      "name": "Google Sheets Trigger",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "yYjQhn9ngWxv2lDL",
+          "name": "[your Gsheet Name]"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7a183566-5128-4f05-9b7c-6ef47dfbe9b7",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Ready to Generate",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        208
+      ],
+      "id": "d158d017-ffe1-4e6d-a3d6-00369eb94780",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "title": "={{ $('Filter').item.json.Topik }}",
+        "additionalFields": {
+          "content": "={{ $json.message.content }}"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        208
+      ],
+      "id": "a4775be3-8c2c-423c-a314-a403b0a81714",
+      "name": "Create a post",
+      "credentials": {
+        "wordpressApi": {
+          "id": "90k7GvC1WOmVZ1HT",
+          "name": "[your Gsheet Name]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Act as a {{ $json.POV }}, who is also a skilled writer with expertise in SEO content creation. Your task is to write a comprehensive article in Bahasa Indonesia about {{ $json.Topik }} for our blog. The primary goals of this article are to optimize our SEO ranking, increase the click-through rate (CTR) to the article, and drive clicks to our call-to-action (CTA) related to {{ $json['CTA Button'] }} for {{ $json.CTA }}. \n\nPlease structure the article using heading 2 format for all subtitles. The main keyword to be included throughout the article is {{ $json.Keyword }}; ensure it appears a minimum of 10 times but no more than 15 times. \n\nTo ensure accuracy, please verify information by checking relevant sources and quoting references appropriately. The article should be written in a clear and engaging manner, making it accessible for HR and payroll newcomers. The total word count should be between 900 and 1000 words. Additionally, ensure that the article is formatted and ready for publication upon completion.\n\nUSE clear and simple language.\nUSE a concise and informative style.\nFOCUS on practical insights that can be applied immediately.\nUSE data and real-life examples to support claims whenever possible.\nAVOID using long dashes (-). Use periods or commas instead.\nAVOID constructions such as “...not only this, but also that.”\nAVOID metaphors and clichés.\nAVOID generalizations.\nAVOID general opening phrases in sentences, such as: in conclusion, ultimately, etc.\nAVOID warnings or additional notes; just provide the requested results.\n\nAVOID asterisks.\nAVOID semicolons.\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        752,
+        208
+      ],
+      "id": "24e163cc-3c88-4faf-9abe-24ebc7c2c59e",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "DPKX6A8VixczIUeJ",
+          "name": "[your Chat GPT Name]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "[your Gsheet ID]",
+          "mode": "list",
+          "cachedResultName": "[your Gsheet Name]",
+          "cachedResultUrl": "[your Gsheet URL]"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1954594741,
+          "mode": "list",
+          "cachedResultName": "[your Gsheet Name]",
+          "cachedResultUrl": "[your Gsheet URL]"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "No": "={{ $('Filter').item.json.No }}",
+            "Status": "Done"
+          },
+          "matchingColumns": [
+            "No"
+          ],
+          "schema": [
+            {
+              "id": "No",
+              "displayName": "No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "POV",
+              "displayName": "POV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Topik",
+              "displayName": "Topik",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CTA Button",
+              "displayName": "CTA Button",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CTA",
+              "displayName": "CTA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        304,
+        576
+      ],
+      "id": "2040fbb6-0a3d-469c-9837-38fda9eb5aa3",
+      "name": "Mark Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SLc1kvcqr8VQbmwj",
+          "name": "[your Gsheet Credetial]"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Gsheet Node\n[sheet] Any new row will be set ready to sending generate",
+        "height": 368,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        16
+      ],
+      "id": "5471982f-651c-43fb-8bc0-057a8fe393bb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Filter\nto avoid looping and generating all row, only trigger to \"Ready to generate\"",
+        "height": 368,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        16
+      ],
+      "id": "8c3514e8-335c-4969-9619-430d037dba9e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## GPT AI Node\nfor generating content with AI with custom prompt, pulling object from Gsheet to prompt\n",
+        "height": 368,
+        "width": 288,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        16
+      ],
+      "id": "b2ebe4a7-673e-4e36-8cf7-705f8384888a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Wordpress\nCreated post from AI, sending into Draft, ready for editing before post",
+        "height": 368,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        16
+      ],
+      "id": "f1be6f69-ea55-4af4-b213-25af85bfa9ca",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Gsheet Node\nAfter sended to draft for avoiding loop/re trigger, latest row at status Coloumn will be set into \"Done\"",
+        "height": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        384
+      ],
+      "id": "4b656029-bb7c-47c7-b3f8-5557d13d0607",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a post": {
+      "main": [
+        [
+          {
+            "node": "Mark Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Status": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "VmxY46r9bn3DH7Hb"
+  },
+  "versionId": "2ee44709-3187-4157-a2be-59c6061be63c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "86f9a48b16b8fc894652167d5e07d0d3dcaf52b83459edcb6298b723e05f2444"
+  },
+  "id": "bi42UojUtxVcW8xk",
+  "tags": [
+    {
+      "createdAt": "2025-11-10T02:48:55.830Z",
+      "updatedAt": "2025-11-10T02:48:55.830Z",
+      "id": "QGcL8Iug8oENoICu",
+      "name": "Marketing"
+    }
+  ]
+}

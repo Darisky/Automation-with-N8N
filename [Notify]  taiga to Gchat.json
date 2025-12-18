@@ -1,0 +1,126 @@
+{
+  "name": "[Notify]  taiga to Gchat",
+  "nodes": [
+    {
+      "parameters": {
+        "projectId": 18
+      },
+      "type": "n8n-nodes-base.taigaTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -80
+      ],
+      "id": "82eea1f4-9215-40bd-9f5d-6d3c0aef420d",
+      "name": "Webhook from Taiga",
+      "webhookId": "####",
+      "credentials": {
+        "taigaApi": {
+          "id": "#####",
+          "name": "ProdEngineer"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "[Your gchat's space webhook]",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"cardsV2\": [\n    {\n      \"cardId\": \"Notify\",\n      \"card\": {\n        \"header\": {\n          \"title\": \"Notify from Taiga\",\n          \"subtitle\": \"{{ $json.data.tags[0] }}\",\n          \"imageType\": \"CIRCLE\"\n        },\n        \"sections\": [\n          {\n            \"widgets\": [\n              {\n                \"textParagraph\": {\n                  \"text\": \"<b>#{{ $json.data.ref }} {{ $json.data.subject }}\\\\n <b>Status:</b> {{ $json.data.status.name }}\\\\n </b><b>Task Creator:</b> {{ $json.data.owner.full_name }}\\\\n <b>Assign to:</b> {{ $json.data.assigned_to.full_name }}\"\n                }\n              },\n              {\n                \"textParagraph\": {\n                  \"text\": \"<b>Description:</b> {{ $json.data.description }}\\\\n <b>Comment:</b> {{ $json.change.comment }}\"\n                }\n              }\n            ]\n          }\n        ]\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        -96
+      ],
+      "id": "87503e0c-7397-4d5f-96ca-3ba5930b9564",
+      "name": "Sending to Webhook Gchat Space Prodify"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook\nTrigger : Taiga creat, update, comment ",
+        "height": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "5b76d562-8672-46b2-b904-4650304371aa",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Notify\nSending detail from trigger",
+        "height": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "a3080cd1-b6d4-4daf-87ab-35720702ab55",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Purpose\nSending Notify from any activity at Taiga to Gchat space (Prodify)\n\n## Credit\nWebhook/endpoint master : Taiga\nGoogle Chat account : Space's wehbook\nFlow : DrskyN",
+        "height": 224,
+        "width": 480,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "c865da4c-506c-4a71-b945-ef7dce811c29",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook from Taiga": {
+      "main": [
+        [
+          {
+            "node": "Sending to Webhook Gchat Space Prodify",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "VmxY46r9bn3DH7Hb",
+    "saveExecutionProgress": true
+  },
+  "versionId": "7b5111ca-bd24-459a-ba75-de3ae33abb4d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "86f9a48b16b8fc894652167d5e07d0d3dcaf52b83459edcb6298b723e05f2444"
+  },
+  "id": "qsXTjHRj8MHwrKue",
+  "tags": [
+    {
+      "createdAt": "2025-11-14T07:40:29.981Z",
+      "updatedAt": "2025-11-14T07:40:29.981Z",
+      "id": "RJXMgW8wbpYFFDoF",
+      "name": "IT"
+    }
+  ]
+}

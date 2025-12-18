@@ -1,0 +1,319 @@
+{
+  "name": "[Notify] Intercom Hadirr to Gchat",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "0efcb64c-7357-42fc-b93b-a11c68374e62",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        112
+      ],
+      "id": "6298abfa-3b18-4724-8fee-39061be1061d",
+      "name": "Webhook",
+      "webhookId": "0efcb64c-7357-42fc-b93b-a11c68374e62"
+    },
+    {
+      "parameters": {
+        "content": "## NOTE\nIn Intercom, \nType User (untuk define user/lead) = Role\nCompany = {{ $json.body.data.item.contact.companies.data[0].id }} << untuk mendefine campany name with Http Request\n\n## Resource\nIntercom \nGchat space Req. Ops : webhook Prospek Hub\nGchat space Req. Finance : webhook Koordinasi Tagihan SaaS\nwebhook : POST | N8N\n\n\n",
+        "height": 416,
+        "width": 960,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "0a1647fe-49cf-47f9-95c5-09fd60e82d32",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.data.item.tag.name }}",
+                    "rightValue": "Req. Ops",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "05fcd500-aab6-48f0-8fc7-63992e3a781c"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9ebb863f-b8c6-40c9-ba9c-b1ddc3b0f9d1",
+                    "leftValue": "={{ $json.body.data.item.tag.name }}",
+                    "rightValue": "Req. Finance",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        224,
+        112
+      ],
+      "id": "cac92782-6271-4b13-acc9-47b78db6c6b8",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.intercom.io/companies/{{ $json.body.data.item.contact.companies.data[0].id }}\n\n",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "intercomApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        48
+      ],
+      "id": "20db7382-09d3-4e9c-b24d-00758dc1d8b5",
+      "name": "Pull Company Name Req. Ops",
+      "credentials": {
+        "intercomApi": {
+          "id": "MrVqUSsV4H6f35F5",
+          "name": "Intercom-Hadirr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.intercom.io/companies/{{ $json.body.data.item.contact.companies.data[0].id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "intercomApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        192
+      ],
+      "id": "1871a9bd-ed14-4639-bca2-17a54d69d9dd",
+      "name": "Pulling Company Name Req. Finance",
+      "credentials": {
+        "intercomApi": {
+          "id": "MrVqUSsV4H6f35F5",
+          "name": "Intercom-Hadirr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAAAQVAq4oU/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=qYrBEE0eJNE-s4Lx6Vjkq6HhHSg9ttenRVdx1SRF_JI",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"cardsV2\": [\n    {\n      \"cardId\": \"Notify\",\n      \"card\": {\n        \"header\": {\n          \"title\": \"🚨 Notify from Intercom🚨 \",\n          \"imageType\": \"CIRCLE\"\n        },\n        \"sections\": [\n          {\n            \"widgets\": [\n              {\n                \"textParagraph\":{\n                  \"text\":\"<font color=\\\"#008fff\\\"><b><i>{{ $('Switch').item.json.body.data.item.tag.name }}</i></b><font>\\n\"\n                }\n              },\n              {\n                \"textParagraph\": {\n                  \"text\": \"- <b>Sender:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes.Sender }}\\n- <b>Nama Produk:</b> Hadirr\\n- <b>Nama Perusahaan:</b> {{ $json.name }}\\n- <b>Jumlah Karywan:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes['jumlah karyawan'] }}\\n- <b>Type:</b> {{ $('Switch').item.json.body.data.item.contact.role }}\\n- <b>PIC:</b> {{ $('Switch').item.json.body.data.item.contact.name }}\\n- <b>Email:</b> {{ $('Switch').item.json.body.data.item.contact.email }}\\n- <b>Kontak PIC:</b> {{ $('Switch').item.json.body.data.item.contact.phone }}\\n- <b>Needs:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes.Needs }}\\n- <b>Note:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes.Notes }} \"\n                }\n              }\n            ]\n          }\n        ]\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        704,
+        48
+      ],
+      "id": "ce98117b-8bf1-4d46-a0fc-0cc783b5a69f",
+      "name": "Req. Ops"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAAAU2d-9ew/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=aMWFz03XA9kYvh0l37Dj0chcQCX-pSUYApUTZAtRUm4",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"cardsV2\": [\n    {\n      \"cardId\": \"Notify\",\n      \"card\": {\n        \"header\": {\n          \"title\": \"🚨 Notify from Intercom🚨 \",\n          \"imageType\": \"CIRCLE\"\n        },\n        \"sections\": [\n          {\n            \"widgets\": [\n              {\n                \"textParagraph\":{\n                  \"text\": \"<font color=\\\"#b53c3c\\\"><b><i>Request PC</i></b></font>\\n\"\n                }\n              },\n              {\n                \"textParagraph\": {\n                  \"text\": \"<b>Sender:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes.Sender }}\\n <b>Needs:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes.Needs }}\\n <b>Nama Produk:</b>  Hadirr\\n <b>Nama Perusahaan: </b> {{ $json.name }}\\n <b>Company ID:</b> {{ $json.company_id }}\\n <b>No Invoice:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes['No Invoice'] }}\\n <b>Detail Req:</b> {{ $('Switch').item.json.body.data.item.contact.custom_attributes['Detail Req'] }}\"\n                }\n              }\n            ]\n          }\n        ]\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        704,
+        192
+      ],
+      "id": "fc4b0edb-d548-41bd-9a81-74f36b935cda",
+      "name": "Req. Finance"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook\nPulling webhook from intercom\nTrigger: tag (Req. Ops & Req. Finance)\n| Method : POST",
+        "height": 496,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "ee97ed16-b715-4ddb-a8dd-61e58d32bcda",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Pull company\nPulling company Detail through company ID with | Method GET\n",
+        "height": 496,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "fd97825c-69d8-44b6-bc92-3cbb9bd7887b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Send Gchat\nSending detail company, user, need, note to Gchat's Space\n| Method POST\n\n",
+        "height": 496,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "d5b43fe0-9160-47c3-bfe6-6318061e625e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Switch\nFiltering between tag Req. Ops & Req. Finance\n",
+        "height": 496,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "d770ab89-ea52-4a1c-85e6-054d75350c9c",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Pull Company Name Req. Ops",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pulling Company Name Req. Finance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Company Name Req. Ops": {
+      "main": [
+        [
+          {
+            "node": "Req. Ops",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pulling Company Name Req. Finance": {
+      "main": [
+        [
+          {
+            "node": "Req. Finance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "VmxY46r9bn3DH7Hb",
+    "timezone": "Asia/Jakarta",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true
+  },
+  "versionId": "fd9a8697-59da-48aa-8f50-719e70c819bf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "86f9a48b16b8fc894652167d5e07d0d3dcaf52b83459edcb6298b723e05f2444"
+  },
+  "id": "CrnQart4MhWGXgxT",
+  "tags": [
+    {
+      "createdAt": "2025-11-05T06:37:10.031Z",
+      "updatedAt": "2025-11-05T06:37:10.031Z",
+      "id": "FV6jcXNQMy5zMyn3",
+      "name": "PC"
+    }
+  ]
+}
